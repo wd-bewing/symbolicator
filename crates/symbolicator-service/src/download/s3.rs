@@ -249,7 +249,7 @@ mod tests {
 
     use aws_sdk_s3::Error as S3Error;
     use aws_sdk_s3::primitives::ByteStream;
-    use sha1::{Digest as _, Sha1};
+    use sha2::{Digest as _, Sha256};
     use symbolicator_sources::{
         CommonSourceConfig, DirectoryLayoutType, RemoteFileUri, S3SecretKey, S3SourceConfig,
         SourceId, SourceLocation,
@@ -417,9 +417,9 @@ mod tests {
         assert!(download_status.is_ok());
         assert!(target_path.exists());
 
-        let hash = Sha1::digest(std::fs::read(target_path).unwrap());
+        let hash = Sha256::digest(std::fs::read(target_path).unwrap());
         let hash = format!("{hash:x}");
-        assert_eq!(hash, "e0195c064783997b26d6e2e625da7417d9f63677");
+        assert_eq!(hash, "9e6e4f2fbd74d668f81cf4d00fc4591183b1407de11add479a547a3469ad9aa5");
     }
 
     #[tokio::test]
