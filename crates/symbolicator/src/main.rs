@@ -23,12 +23,21 @@ pub use symbolicator_service::{config, metric, utils};
 
 mod cli;
 mod endpoints;
+mod fips;
 mod healthcheck;
 mod logging;
 mod server;
 mod service;
 
 fn main() {
+    #[cfg(feature = "fips")]
+    {
+        if let Err(e) = fips::ensure_fips_loaded() {
+            eprintln!("{e}");
+            std::process::exit(1);
+        }
+    }
+
     match cli::execute() {
         Ok(()) => std::process::exit(0),
         Err(error) => {

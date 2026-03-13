@@ -32,6 +32,10 @@ The resulting binaries ends up in `target/release/` along with debug
 information files. On Linux, debug information is part of the executable and
 might need to be stripped using `objcopy`.
 
+### FIPS 140-3
+
+To build and run the symbolicator binary with FIPS 140-3 compatible cryptography, build with `--no-default-features --features fips -p symbolicator`, set `FIPS_MODE=1` and `OPENSSL_MODULES` at run time, and use OpenSSL 3.x with the FIPS module. See [docs/FIPS.md](docs/FIPS.md) for prerequisites, build steps, and runtime.
+
 ## Usage with Sentry
 
 The following requires a recent git version of Sentry.

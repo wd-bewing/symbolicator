@@ -6,6 +6,10 @@ edition = "2024"
 license-file = "../../LICENSE.md"
 default-run = "symbolicator"
 
+[features]
+# FIPS 140-3: load OpenSSL FIPS provider at startup; use native-tls (OpenSSL) for outbound HTTPS. Build with: cargo build --no-default-features --features fips -p symbolicator
+fips = ["dep:openssl", "symbolicator-service/fips"]
+
 [dependencies]
 anyhow = { workspace = true }
 axum = { workspace = true, features = ["multipart"] }
@@ -24,8 +28,22 @@ symbolicator-crash = { workspace = true, optional = true }
 symbolicator-js = { workspace = true }
 symbolicator-native = { workspace = true }
 symbolicator-proguard = { workspace = true }
-symbolicator-service = { workspace = true }
 symbolicator-sources = { workspace = true }
+openssl = { workspace = true, optional = true }
+
+[target.'cfg(not(feature = "fips"))'.dependencies]
+symbolicator-service = { path = "../symbolicator-service", default-features = false, features = ["rustls"] }
+
+[target.'cfg(feature = "fips")'.dependencies]
+symbolicator-service = { path = "../symbolicator-service", default-features = false, features = ["fips"] }
+
+[target.'cfg(not(feature = "fips"))'.dependencies]
+reqwest = { workspace = true, default-features = false, features = ["rustls-tls", "multipart"] }
+
+[target.'cfg(feature = "fips")'.dependencies]
+reqwest = { workspace = true, default-features = false, features = ["native-tls", "multipart"] }
+
+[dependencies]
 tempfile = { workspace = true }
 thiserror = { workspace = true}
 tokio = { workspace = true, features = ["rt-multi-thread", "macros", "fs"] }
@@ -37,7 +55,6 @@ tower-service = { workspace = true}
 tracing = { workspace = true}
 tracing-subscriber = { workspace = true }
 uuid = { workspace = true }
-reqwest = { workspace = true }
 
 [dev-dependencies]
 insta = { workspace = true }

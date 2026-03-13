@@ -66,6 +66,29 @@ jobs:
           SENTRY_SYMBOLICATOR_TEST_AWS_SECRET_ACCESS_KEY: ${{ secrets.SENTRY_SYMBOLICATOR_TEST_AWS_SECRET_ACCESS_KEY }}
           GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_JSON }}
 
+  test-fips:
+    name: Build and test with FIPS feature
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install libcurl-dev and OpenSSL dev
+        run: |
+          sudo apt update
+          sudo apt-get install -y libcurl4-openssl-dev libssl-dev pkg-config
+
+      - name: Checkout sources
+        uses: actions/checkout@v6.0.2
+
+      - name: Install rust stable toolchain
+        run: rustup toolchain install stable --profile minimal --no-self-update
+
+      - name: Cache rust cargo artifacts
+        uses: swatinem/rust-cache@v2
+
+      - name: Build symbolicator with FIPS feature
+        run: cargo build --no-default-features --features fips -p symbolicator --locked
+      - name: Run symbolicator crate tests with FIPS feature
+        run: cargo test --no-default-features --features fips -p symbolicator --locked
+
   test_against_latest_sentry:
     name: Sentry-Symbolicator Tests
     runs-on: ubuntu-latest
